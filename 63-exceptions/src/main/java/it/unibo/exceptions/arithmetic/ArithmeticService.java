@@ -10,6 +10,8 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import java.io.IOException;
+
 /**
  * A service implementing a simple interpreter for an arithmetic language.
  * Runs expressions composed of numbers and binary operators
@@ -54,9 +56,9 @@ public final class ArithmeticService {
      *
      * @return the result of the process
      */
-    public String process() {
+    public String process() throws IOException {
         if (commandQueue.isEmpty()) {
-            System.out.println("No commands sent, no result available");
+            throw IllegalStateException("No commands sent, no result available");
         }
         while (commandQueue.size() != 1) {
             final var nextMultiplication = commandQueue.indexOf(TIMES);
@@ -74,20 +76,24 @@ public final class ArithmeticService {
                     : max(nextSum, nextMinus);
                 if (nextOp != -1) {
                     if (commandQueue.size() < 3) {
-                        System.out.println("Inconsistent operation: " + commandQueue);
+                        throw IllegalStateException("Inconsistent operation: " + commandQueue);
                     }
                     computeAt(nextOp);
                 } else if (commandQueue.size() > 1) {
-                    System.out.println("Inconsistent state: " + commandQueue);
+                    throw IllegalStateException("Inconsistent state: " + commandQueue);
                 }
             }
         }
         final var finalResult = commandQueue.get(0);
         final var possibleException = nullIfNumberOrException(finalResult);
         if (possibleException != null) {
-            System.out.println("Invalid result of operation: " + finalResult);
+            throw IllegalStateException("Invalid result of operation: " + finalResult);
         }
-        return finalResult;
+        try {
+            return finalResult;
+        } finally {
+            commandQueue.clear();
+        }
         /*
          * The commandQueue should be cleared, no matter what, when the method exits
          * But how?
@@ -96,18 +102,18 @@ public final class ArithmeticService {
 
     private void computeAt(final int operatorIndex) {
         if (operatorIndex == 0) {
-            System.out.println("Illegal start of operation: " + commandQueue);
+            throw IllegalStateException("Illegal start of operation: " + commandQueue);
         }
         if (commandQueue.size() < 3) {
-            System.out.println("Not enough operands: " + commandQueue);
+            throw IllegalStateException("Not enough operands: " + commandQueue);
         }
         if (commandQueue.size() < operatorIndex + 1) {
-            System.out.println("Missing right operand: " + commandQueue);
+            throw IllegalStateException("Missing right operand: " + commandQueue);
         }
         final var rightOperand = commandQueue.remove(operatorIndex + 1);
         final var leftOperand = commandQueue.remove(operatorIndex - 1);
         if (KEYWORDS.contains(rightOperand) || KEYWORDS.contains(leftOperand)) {
-            System.out.println(
+            throw IllegalStateException(
                 "Expected a number, but got " + leftOperand + " and " + rightOperand + " in " + commandQueue
             );
         }
@@ -120,7 +126,7 @@ public final class ArithmeticService {
             case TIMES -> left * right;
             case DIVIDED -> left / right;
             default ->  {
-                System.out.println("Unknown operand " + operand);
+                throw IllegalStateException("Unknown operand " + operand);
                 yield Double.NaN;
             }
         };
