@@ -71,7 +71,7 @@ public final class ServiceBehindUnstableNetwork implements NetworkComponent {
     }
 
     @Override
-    public String receiveResponse() throws NetworkException {
+    public String receiveResponse() throws IOException {
         accessTheNework(null);
         try {
             return new ArithmeticService(Collections.unmodifiableList(commandQueue)).process();
