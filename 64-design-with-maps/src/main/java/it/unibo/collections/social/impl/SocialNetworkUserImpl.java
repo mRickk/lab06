@@ -8,12 +8,14 @@ import it.unibo.collections.social.api.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+//import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+//import javax.print.attribute.HashAttributeSet;
 
 /**
  * 
@@ -36,7 +38,7 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      * In order to save the people followed by a user organized in groups, adopt
      * a generic-type Map:  think of what type of keys and values would best suit the requirements
      */
-
+    private Map<String, Set<U>> followedUsers;
     /*
      * [CONSTRUCTORS]
      *
@@ -62,12 +64,16 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *            application
      */
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
-        super(null, null, null, 0);
+        super(name, surname, user, userAge);
+        followedUsers = new HashMap<>();
     }
 
     /*
      * 2) Define a further constructor where the age defaults to -1
      */
+    public SocialNetworkUserImpl(final String name, final String surname, final String user) {
+        this(name, surname, user, -1);
+    }
 
     /*
      * [METHODS]
@@ -76,7 +82,12 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
-        return false;
+        if (followedUsers.containsKey(circle)) {
+            return followedUsers.get(circle).add(user);
+        } else {
+            followedUsers.put(circle, new HashSet<>());
+            return followedUsers.get(circle).add(user);
+        }
     }
 
     /**
@@ -86,11 +97,17 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
-        return null;
+        Set<U> temp = new HashSet<>();
+        temp.addAll(followedUsers.getOrDefault(groupName, new HashSet<>()));
+        return temp;
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+        List<U> temp = new ArrayList<>();
+        for (String key : followedUsers.keySet()) {
+            temp.addAll(followedUsers.get(key));
+        }
+        return temp;
     }
 }
