@@ -28,9 +28,8 @@ public class GraphImpl<N> implements Graph<N> {
     @Override
     public void addEdge(N source, N target) {
         if (source != null && target != null
-            && graph.containsValue(source) && graph.containsValue(target)) { //protezione
+            && graph.containsKey(target) && graph.containsKey(target)) { //protection
             graph.get(source).add(target);
-            graph.get(target).add(source);
         }
     }
 
@@ -44,7 +43,9 @@ public class GraphImpl<N> implements Graph<N> {
     @Override
     public Set<N> linkedNodes(N node) {
         Set<N> temp = new HashSet<>();
-        temp.addAll(graph.get(node));
+        for (N nd : graph.get(node)) {
+            temp.add(nd);
+        }
         return temp;
     }
 
@@ -53,5 +54,4 @@ public class GraphImpl<N> implements Graph<N> {
         BFS<N> bfs = new BFS<>(source, target);
         return bfs.breadthFirstSearch(this);
     }
-    
 }

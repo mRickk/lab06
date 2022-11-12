@@ -23,7 +23,8 @@ public final class UseGraph {
         /*
          * Test your graph implementation(s) by calling testGraph
          */
-        testGraph(new GraphImpl<String>());
+        Graph<String> g = new GraphImpl<>();
+        testGraph(g);
     }
 
     private static void testGraph(final Graph<String> graph) {
